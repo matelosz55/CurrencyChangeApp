@@ -1,0 +1,2 @@
+# CurrencyChangeApp
+Simple Console Application
