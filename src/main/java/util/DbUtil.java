@@ -8,7 +8,7 @@ public class DbUtil {
 
     private static final String HOSTNAME = "localhost";
     private static final String PORT = "3306";
-    private static final String DATABASE = "workshop2";
+    private static final String DATABASE = "exchangeApp";
     private static final String DB_USER = "root";
     private static final String DB_PASS = "";
 

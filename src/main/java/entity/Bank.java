@@ -6,6 +6,15 @@ public class Bank {
     private double usd_amount;
     private double pln_amount;
 
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public double getEuro_amount() {
         return euro_amount;
     }
