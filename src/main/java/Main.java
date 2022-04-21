@@ -1,5 +1,4 @@
 import dao.UserDao;
-import entity.Rates;
 import entity.User;
 
 import java.io.*;
@@ -31,7 +30,8 @@ public class Main {
         PrintWriter writer = new PrintWriter("rates.txt");
         Scanner scanner = new Scanner(System.in);
         System.out.println("Type commission rate (in %):");
-        writer.println(scanner.nextLine());
+        double commissionRate = Double.parseDouble(scanner.nextLine()) / 100;
+        writer.println(commissionRate);
         System.out.println("Type EURO to PLN rate:");
         writer.println(scanner.nextLine());
         System.out.println("Type PLN to EURO rate:");
