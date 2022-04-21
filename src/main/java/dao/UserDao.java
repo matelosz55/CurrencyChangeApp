@@ -263,14 +263,6 @@ public class UserDao {
         }
     }
 
-
-    //      TAKE ALL CREDENTIALS METHOD - JUST TO IMPROVE VISIBILITY AND AVOID CODE DUPLICATION
-    private void takeAllCredentials(ResultSet rs, long id) throws SQLException {
-        rs.getString("username");
-        rs.getString("email");
-        rs.getLong("accountNumber");
-    }
-
     //      TRANSFER MONEY
     public void transferMoney(long idFrom, long idTo, String currency, double amount, double commission) {
         cashOperations(SUBSTRACT_MONEY_FROM_ACCOUNT,idFrom,currency,amount);
@@ -279,9 +271,4 @@ public class UserDao {
         addCommission(currency,amount*commission);
     }
 
-    private User[] addToArray(User user, User[] users) {
-        User[] copy = Arrays.copyOf(users, users.length + 1);
-        copy[users.length] = user;
-        return copy;
-    }
 }

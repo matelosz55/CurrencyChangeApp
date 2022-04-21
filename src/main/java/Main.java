@@ -81,7 +81,8 @@ public class Main {
         System.out.println("4 - transfer to another user                5 - exchange currency");
         System.out.println("6 - check transactions history              7 - check bank balance");
         System.out.println("8 - update user data                        9 - check commissions by operation type");
-        System.out.println("10 - display user operations by currency    E - EXIT");
+        System.out.println("10 - display user operations by currency    11 - remove user");
+        System.out.println("E - EXIT");
         Scanner menu = new Scanner(System.in);
         String str = menu.nextLine();
         switch (str) {
@@ -117,10 +118,22 @@ public class Main {
             case "10":
                 displayByCurrency();
                 break;
+            case "11":
+                removeUser();
             case "E":
                 break;
         }
     }
+
+    private static void removeUser() throws SQLException, IOException {
+        UserDao userDao = new UserDao();
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Type user id:");
+        long id = Long.parseLong(scan.nextLine());
+        userDao.delete(id);
+        anyOtherAction();
+    }
+
     // DISPLAY USER OPERATIONS FOR SPECIFIC CURRENCY
     private static void displayByCurrency() throws SQLException, IOException {
         UserDao userDao = new UserDao();
