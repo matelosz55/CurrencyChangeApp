@@ -72,11 +72,12 @@ public class Main {
 
     private static void menu() throws SQLException, IOException {
         System.out.println("What do you want to do?");
-        System.out.println("0 - create a new account                1 - check user balance");
-        System.out.println("2 - add money to account                3 - withdraw money");
-        System.out.println("4 - transfer to another user            5 - exchange currency");
-        System.out.println("6 - check transactions history          7 - check bank balance");
-        System.out.println("8 - update user data                    E - EXIT");
+        System.out.println("0 - create a new account                    1 - check user balance");
+        System.out.println("2 - add money to account                    3 - withdraw money");
+        System.out.println("4 - transfer to another user                5 - exchange currency");
+        System.out.println("6 - check transactions history              7 - check bank balance");
+        System.out.println("8 - update user data                        9 - check commissions by operation type");
+        System.out.println("10 - display user operations by currency    E - EXIT");
         Scanner menu = new Scanner(System.in);
         String str = menu.nextLine();
         switch (str) {
@@ -106,9 +107,44 @@ public class Main {
             case "8":
                 updateUserData();
                 break;
+            case "9":
+                operationType();
+                break;
+            case "10":
+                displayByCurrency();
+                break;
             case "E":
                 break;
         }
+    }
+
+    private static void displayByCurrency() throws SQLException, IOException {
+        UserDao userDao = new UserDao();
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Type user id:");
+        long id = Long.parseLong(scan.nextLine());
+        System.out.println("Choose currency (EURO/USD/PLN)");
+        String currency = scan.nextLine();
+        userDao.displayByCurrency(id,currency);
+        anyOtherAction();
+    }
+
+    private static void operationType() throws SQLException, IOException {
+        UserDao userDao = new UserDao();
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Check operation type");
+        System.out.println("e - external transfer");
+        System.out.println("w - withdrawal");
+        System.out.println("ex - exchange currency");
+        System.out.println("c - transfer to another account");
+        String str = scan.nextLine();
+        switch (str) {
+            case "e" -> userDao.profitGroup("External transfer");
+            case "w" -> userDao.profitGroup("Withdrawal");
+            case "ex" -> userDao.profitGroup("Exchange");
+            case "c" -> userDao.profitGroup("Cash transfer");
+        }
+        anyOtherAction();
     }
 
     private static void updateUserData() throws SQLException, IOException {
@@ -145,9 +181,9 @@ public class Main {
         Scanner scan = new Scanner(System.in);
         System.out.println("Type id of a user");
         long id = Integer.parseInt(scan.nextLine());
-        System.out.println("Which currency do you want to exchange? (PLN/EURO/USD");
+        System.out.println("Which currency do you want to exchange? (PLN/EURO/USD)");
         String currencyFrom = scan.nextLine();
-        System.out.println("Choose new currency: (PLN/EURO/USD");
+        System.out.println("Choose new currency: (PLN/EURO/USD)");
         String currencyTo = scan.nextLine();
         System.out.println("Type amount of money:");
         double amount = Double.parseDouble(scan.nextLine());
@@ -157,8 +193,8 @@ public class Main {
                 switch (currencyTo) {
                     case "EURO" -> rate = plnToEuro;
                     case "USD" -> rate = plnToUsd;
+
                 }
-                break;
             case "EURO":
                 rate = switch (currencyTo) {
                     case "PLN" -> euroToPln;

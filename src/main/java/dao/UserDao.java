@@ -7,8 +7,6 @@ import java.sql.*;
 import java.util.Arrays;
 
 public class UserDao {
-
-
     // ADD MONEY TO ACCOUNT - QUERY
     private static final String ADD_MONEY_TO_ACCOUNT = "UPDATE users SET balanceEURO = balanceEURO + ?,balanceUSD = balanceUSD + ?, balancePLN = balancePLN + ? WHERE id = ?";
     //SUBSTRACT MONEY FROM ACCOUNT - QUERY
@@ -26,6 +24,9 @@ public class UserDao {
     private static final String SHOW_ALL_MONEY = "select SUM(EURO),SUM(USD),SUM(PLN) from bank";
     //TRANSFER HISTORY FOR ACCOUNT - QUERY
     private static final String TRANSACTION_HISTORY = " SELECT * FROM transfersHistory WHERE from_user_id = ? OR to_user_id = ?";
+    private static final String GROUP_BY_CURRENCY =  "SELECT * from transfersHistory WHERE (from_user_id = ? OR to_user_id = ?) AND (currency_from = ? or currency_to = ?)";
+    //PROFIT GROUPED BY TYPE OF TRANSACTION
+    private static final String PROFIT_GROUP = "SELECT commission, operation_type FROM transfersHistory where operation_type = ?";
 
     //      CREATE NEW USER
     public User create(User user) {
@@ -78,9 +79,22 @@ public class UserDao {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-
     }
 
+    //      DISPLAY HISTORY BY CURRENCY
+    public void displayByCurrency(long userId, String currency) {
+        try (Connection connection = DbUtil.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(GROUP_BY_CURRENCY)) {
+                statement.setLong(1, userId);
+                statement.setLong(2, userId);
+                statement.setString(3, currency);
+                statement.setString(4, currency);
+                displayMethod(statement);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
 
     //      UPDATE USER DATA
     public void update(long id, String username, String email, String password) {
@@ -129,17 +143,34 @@ public class UserDao {
         }
     }
 
+    public void profitGroup(String operationType) {
+        try (Connection connection = DbUtil.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(PROFIT_GROUP)) {
+                statement.setString(1, operationType);
+                displayMethod(statement);
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     private void displayMethod(PreparedStatement statement) throws SQLException {
         ResultSet rs = statement.executeQuery();
         ResultSetMetaData rsmd = rs.getMetaData();
         int columnsNumber = rsmd.getColumnCount();
+        int counter = 0;
         while (rs.next()) {
             for (int i = 1; i <= columnsNumber; i++) {
                 if (i > 1) System.out.print(",  ");
                 String columnValue = rs.getString(i);
                 System.out.print(rsmd.getColumnName(i) + ": " + columnValue);
+                counter++;
             }
             System.out.println("");
+        }
+        if (counter == 0){
+            System.out.println("No records.");
         }
     }
 
