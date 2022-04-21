@@ -31,4 +31,4 @@ CREATE TABLE IF NOT EXISTS bank(
 );
 
 INSERT INTO users(username,email,password,accountNumber,balanceEURO,balanceUSD,balancePLN)
-VALUES('mati95','mati@gmail.com','haslo1234',200000000,0,0,0),('natalia97','natalia97@gmail.com','12345','200000001',0,0,0),('szybkiKarol','szybkikarol@gmail.com','haslomaslo',200000002,0,0,0);
+VALUES('mati95','mati@gmail.com','haslo1234',200000000,0,0,0),('natalia97','natalia97@gmail.com','12345',200000001,0,0,0),('szybkiKarol','szybkikarol@gmail.com','haslomaslo',200000002,0,0,0);
