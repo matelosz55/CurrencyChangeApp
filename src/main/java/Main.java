@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 public class Main {
 
+    // ENTRY METHOD
     private static void hello() throws SQLException, IOException {
         System.out.println("Hello in Crust bank!");
         System.out.println("Do you want to use regular rates and commission ?   (y/n)");
@@ -26,6 +27,7 @@ public class Main {
         }
     }
 
+    //  METHOD FOR HANDLING THE NEW CURRENCY RATES;
     private static void fileWriter() throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter writer = new PrintWriter("rates.txt");
         Scanner scanner = new Scanner(System.in);
@@ -47,6 +49,7 @@ public class Main {
         writer.close();
     }
 
+    // SAVING DEFAULT VALUES FOR ALL THE RATES
     private static void fileWriterDefault() throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter writer = new PrintWriter("rates.txt");
         writer.println(0.05);
@@ -59,6 +62,7 @@ public class Main {
         writer.close();
     }
 
+    // RECEIVE RATES VALUES FROM THE FILE
     private static Double[] fileReader() throws IOException {
         Double[] ratesTab = new Double[7];
         int i = 0;
@@ -69,7 +73,7 @@ public class Main {
        return ratesTab;
     }
 
-
+    // MAIN MENU
     private static void menu() throws SQLException, IOException {
         System.out.println("What do you want to do?");
         System.out.println("0 - create a new account                    1 - check user balance");
@@ -117,7 +121,7 @@ public class Main {
                 break;
         }
     }
-
+    // DISPLAY USER OPERATIONS FOR SPECIFIC CURRENCY
     private static void displayByCurrency() throws SQLException, IOException {
         UserDao userDao = new UserDao();
         Scanner scan = new Scanner(System.in);
@@ -128,7 +132,7 @@ public class Main {
         userDao.displayByCurrency(id,currency);
         anyOtherAction();
     }
-
+    // DISPLAY OPERATIONS BY THE OPERATION TYPE
     private static void operationType() throws SQLException, IOException {
         UserDao userDao = new UserDao();
         Scanner scan = new Scanner(System.in);
@@ -146,7 +150,7 @@ public class Main {
         }
         anyOtherAction();
     }
-
+    // UPDATE USER DATA
     private static void updateUserData() throws SQLException, IOException {
         UserDao userDao = new UserDao();
         Scanner scan = new Scanner(System.in);
@@ -161,13 +165,13 @@ public class Main {
         userDao.update(id, username, email, pass);
         anyOtherAction();
     }
-
+    // CHECKING BANK BALLANCE
     private static void bankBalance() throws SQLException, IOException {
         UserDao userDao = new UserDao();
         userDao.showAllMoney();
         anyOtherAction();
     }
-
+    // CHECK TRANSACTION HISTORY FOR SPECIFIC USER
     private static void checkTransactionHistory() throws SQLException, IOException {
         UserDao userDao = new UserDao();
         System.out.println("Type user ID:");
@@ -175,7 +179,7 @@ public class Main {
         userDao.readHistory(scan.nextInt());
         anyOtherAction();
     }
-
+    // EXCHANGE CURRENCY FOR A USER
     private static void exchangeCurrency(double commissionRate, double euroToPln, double plnToEuro, double usdToPln, double plnToUsd, double usdToEuro, double euroToUsd) throws SQLException, IOException {
         UserDao userDao = new UserDao();
         Scanner scan = new Scanner(System.in);
@@ -212,7 +216,7 @@ public class Main {
                 anyOtherAction();
         }
     }
-
+    // TRANSFER MONEY METHOD
     private static void transfer() throws SQLException, IOException {
         UserDao userdao = new UserDao();
         Scanner scan = new Scanner(System.in);
@@ -231,7 +235,7 @@ public class Main {
         userdao.transferMoney(id, id2, currency, amount, fileReader()[0]);
         anyOtherAction();
     }
-
+    // WITHDRAWAL METHOD
     private static void withDrawal() throws SQLException, IOException {
         UserDao userdao = new UserDao();
         Scanner scan = new Scanner(System.in);
@@ -248,7 +252,7 @@ public class Main {
         userdao.withDrawMoney(id, currency, amount, fileReader()[0]);
         anyOtherAction();
     }
-
+    // ADD SOME MONEY FOR THE SPECIFIC USER
     private static void addMoney() throws SQLException, IOException {
         UserDao userdao = new UserDao();
         Scanner scan = new Scanner(System.in);
@@ -265,7 +269,7 @@ public class Main {
         userdao.addMoney(id, currency, amount, fileReader()[0]);
         anyOtherAction();
     }
-
+    // CHECK BALANCE FOR THE SPECIFIC USER
     private static void checkBalance() throws SQLException, IOException {
         UserDao userdao = new UserDao();
         Scanner scan = new Scanner(System.in);
@@ -274,7 +278,7 @@ public class Main {
         userdao.read(id);
         anyOtherAction();
     }
-
+    // CREATE NEW USER METHOD
     private static void createUser() throws SQLException, IOException {
         User user = new User();
         System.out.println("Type new username:");
@@ -289,11 +293,11 @@ public class Main {
         userDao.create(user);
         anyOtherAction();
     }
-
+    // GENERATING RANDOM NUMBER - JUST FOR ACCOUNT NUMBER PURPOSES
     private static long getRandomNumber(long min, long max) {
         return (int) ((Math.random() * (max - min)) + min);
     }
-
+    // ASK FOR OTHER ACTIONS
     private static void anyOtherAction() throws SQLException, IOException {
         System.out.println("\nWould you like to perform any other action? (press y/n)");
         Scanner menu = new Scanner(System.in);
@@ -308,11 +312,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws SQLException, IOException {
-
         hello();
-
-
-
     }
 
 }
