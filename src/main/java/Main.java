@@ -124,7 +124,7 @@ public class Main {
                 break;
         }
     }
-
+    // REMOVE USER METHOD
     private static void removeUser() throws SQLException, IOException {
         UserDao userDao = new UserDao();
         Scanner scan = new Scanner(System.in);
