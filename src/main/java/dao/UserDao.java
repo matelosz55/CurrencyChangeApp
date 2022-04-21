@@ -142,7 +142,7 @@ public class UserDao {
             ex.printStackTrace();
         }
     }
-
+    // SELECT ALL COMMISSIONS GROUPED BY OPERATION TYPE
     public void profitGroup(String operationType) {
         try (Connection connection = DbUtil.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(PROFIT_GROUP)) {
@@ -154,7 +154,7 @@ public class UserDao {
             ex.printStackTrace();
         }
     }
-
+    // SNIPPET USED FOR DISPLAYING SOME DATA
     private void displayMethod(PreparedStatement statement) throws SQLException {
         ResultSet rs = statement.executeQuery();
         ResultSetMetaData rsmd = rs.getMetaData();
