@@ -8,9 +8,6 @@ public class User {
     private String userName;
     private String email;
     private String hashedPassword;
-    private double balancePLN;
-    private double balanceUSD;
-    private double balanceEURO;
     private long accountNumber;
 
     public long getAccountNumber() {
@@ -43,30 +40,6 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public double getBalancePLN() {
-        return balancePLN;
-    }
-
-    public void setBalancePLN(double balancePLN) {
-        this.balancePLN = balancePLN;
-    }
-
-    public double getBalanceUSD() {
-        return balanceUSD;
-    }
-
-    public void setBalanceUSD(double balanceUSD) {
-        this.balanceUSD = balanceUSD;
-    }
-
-    public double getBalanceEURO() {
-        return balanceEURO;
-    }
-
-    public void setBalanceEURO(double balanceEURO) {
-        this.balanceEURO = balanceEURO;
     }
 
     public String getHashedPassword() {

@@ -1,0 +1,34 @@
+CREATE TABLE IF NOT EXISTS users(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) UNIQUE,
+    email VARCHAR(255) UNIQUE,
+    accountNumber BIGINT UNIQUE,
+    password VARCHAR(255),
+    balanceEURO DECIMAL(10,2),
+    balanceUSD DECIMAL(10,2),
+    balancePLN DECIMAL(10,2)
+
+);
+
+CREATE TABLE IF NOT EXISTS transfersHistory(
+    operation_id INT AUTO_INCREMENT PRIMARY KEY,
+    from_user_id INT,
+    to_user_id INT,
+    commission DECIMAL(10,2) NOT NULL,
+    amount_from DECIMAL(10,2) NOT NULL,
+    amount_to DECIMAL(10,2) NOT NULL,
+    operation_type VARCHAR(20),
+    currency_from VARCHAR(10),
+    currency_to VARCHAR(10)
+
+);
+
+CREATE TABLE IF NOT EXISTS bank(
+    change_id INT AUTO_INCREMENT PRIMARY KEY,
+    EURO DECIMAL(10,2),
+    USD DECIMAL(10,2),
+    PLN DECIMAL(10,2)
+);
+
+INSERT INTO users(username,email,password,accountNumber,balanceEURO,balanceUSD,balancePLN)
+VALUES('mati95','mati@gmail.com','haslo1234',200000000,0,0,0),('natalia97','natalia97@gmail.com','12345','200000001',0,0,0),('szybkiKarol','szybkikarol@gmail.com','haslomaslo',200000002,0,0,0);

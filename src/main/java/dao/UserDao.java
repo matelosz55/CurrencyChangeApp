@@ -1,14 +1,9 @@
 package dao;
-
-import entity.Bank;
 import entity.User;
 import org.mindrot.jbcrypt.BCrypt;
 import util.DbUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Arrays;
 
 public class UserDao {
@@ -29,6 +24,8 @@ public class UserDao {
     //UPDATE BANK ACCOUNT - QUERIES
     private static final String UPDATE_BANK_ACCOUNT = "INSERT INTO bank(EURO,USD,PLN) VALUES(?,?,?)";
     private static final String SHOW_ALL_MONEY = "select SUM(EURO),SUM(USD),SUM(PLN) from bank";
+    //TRANSFER HISTORY FOR ACCOUNT - QUERY
+    private static final String TRANSACTION_HISTORY = " SELECT * FROM transfersHistory WHERE from_user_id = ? OR to_user_id = ?";
 
     //      CREATE NEW USER
     public User create(User user) {
@@ -58,23 +55,32 @@ public class UserDao {
 
 
     //      DISPLAY SPECIFIC USER
-    public User read(long userId) {
+    public void read(long userId) {
         try (Connection connection = DbUtil.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(SELECT_USER_QUERY)) {
                 statement.setLong(1, userId);
-                ResultSet rs = statement.executeQuery();
-                if (rs.next()) {
-                    User user = new User();
-                    user.setId(userId);
-                    takeAllCredentials(rs, user);
-                    return user;
-                }
+                displayMethod(statement);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return null;
+
     }
+
+    //      DISPLAY HISTORY FOR SPECIFIC USER
+    public void readHistory(long userId) {
+        try (Connection connection = DbUtil.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(TRANSACTION_HISTORY)) {
+                statement.setLong(1, userId);
+                statement.setLong(2, userId);
+                displayMethod(statement);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
 
     //      UPDATE USER DATA
     public void update(long id, String username, String email, String password) {
@@ -115,11 +121,25 @@ public class UserDao {
     public void showAllMoney() {
         try (Connection connection = DbUtil.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(SHOW_ALL_MONEY)) {
-                ResultSet rs = statement.executeQuery();
-
+                displayMethod(statement);
             }
+
         } catch (SQLException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void displayMethod(PreparedStatement statement) throws SQLException {
+        ResultSet rs = statement.executeQuery();
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columnsNumber = rsmd.getColumnCount();
+        while (rs.next()) {
+            for (int i = 1; i <= columnsNumber; i++) {
+                if (i > 1) System.out.print(",  ");
+                String columnValue = rs.getString(i);
+                System.out.print(rsmd.getColumnName(i) + ": " + columnValue);
+            }
+            System.out.println("");
         }
     }
 
@@ -127,42 +147,29 @@ public class UserDao {
     public void addMoney(long id, String currency, double amount, double commission) {
         cashOperations(ADD_MONEY_TO_ACCOUNT, id, currency, (amount - (amount * commission)));
         saveInHistory(id, id, (amount * commission), amount, (amount - (amount * commission)), "External transfer", currency, currency);
+        addCommission(currency,amount*commission);
     }
 
     //      SUBTRACT MONEY FROM ACCOUNT
     public void withDrawMoney(long id, String currency, double amount, double commission) {
         cashOperations(SUBSTRACT_MONEY_FROM_ACCOUNT, id, currency, (amount - (amount * commission)));
         saveInHistory(id, id, (amount * commission), -amount, (amount - (amount * commission)), "Withdrawal", currency, currency);
+        addCommission(currency,amount*commission);
     }
 
-    // EXCHANGE MONEY
-    public void exchange(long idFrom, long idTo, String currencyFrom, String currencyTo, String exchangeType, double amount, double commission, double exchangeRate) {
-        cashOperations(SUBSTRACT_MONEY_FROM_ACCOUNT, idFrom, currencyFrom, amount);
-        cashOperations(ADD_MONEY_TO_ACCOUNT, idTo, currencyTo, exchangeRate * (amount - (amount * commission)));
-        saveInHistory(idFrom, idTo, (amount * commission), amount, exchangeRate * (amount - (amount * commission)), "Exchange", currencyFrom, currencyTo);
+    //      EXCHANGE MONEY
+    public void exchange(long id, String currencyFrom, String currencyTo, double amount, double commission, double exchangeRate) {
+        cashOperations(SUBSTRACT_MONEY_FROM_ACCOUNT, id, currencyFrom, amount);
+        cashOperations(ADD_MONEY_TO_ACCOUNT, id, currencyTo, exchangeRate * (amount - (amount * commission)));
+        saveInHistory(id,id, (amount * commission), amount, exchangeRate * (amount - (amount * commission)), "Exchange", currencyFrom, currencyTo);
+        addCommission(currencyFrom,amount*commission);
     }
 
     //      UPDATE MONEY METHOD - JUST TO IMPROVE VISIBILITY AND AVOID CODE DUPLICATION
     private void cashOperations(String operationQuery, long userId, String currency, double amount) {
         try (Connection connection = DbUtil.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(operationQuery)) {
-                switch (currency) {
-                    case "PLN":
-                        statement.setDouble(1, 0);
-                        statement.setDouble(2, 0);
-                        statement.setDouble(3, amount);
-                        break;
-                    case "EURO":
-                        statement.setDouble(1, amount);
-                        statement.setDouble(2, 0);
-                        statement.setDouble(3, 0);
-                        break;
-                    case "USD":
-                        statement.setDouble(1, 0);
-                        statement.setDouble(2, amount);
-                        statement.setDouble(3, 0);
-                        break;
-                }
+                insertValues(currency, amount, statement);
 
                 statement.setLong(4, userId);
                 statement.executeUpdate();
@@ -192,45 +199,53 @@ public class UserDao {
     }
 
     //      ADD COMMISSION TO THE BANK TABLE
-    private void addCommission(Bank bank) {
+    private void addCommission(String currency, double amount) {
         try (Connection connection = DbUtil.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(UPDATE_BANK_ACCOUNT)) {
-                statement.setDouble(1, bank.getEuro_amount());
-                statement.setDouble(2, bank.getUsd_amount());
-                statement.setDouble(3, bank.getPln_amount());
+                insertValues(currency, amount, statement);
                 statement.executeUpdate();
-                ResultSet rs = statement.getGeneratedKeys();
-                if (rs.next()) {
-                    long id = rs.getLong(1);
-                    bank.setId(id);
-                }
-
-                return;
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
 
+    //      INSERT MONEY METHOD - JUST TO IMPROVE VISIBILITY AND AVOID CODE DUPLICATION
 
-    //      SHOW CURRENT BANK ACCOUNT
+    private void insertValues(String currency, double amount, PreparedStatement statement) throws SQLException {
+        switch (currency) {
+            case "PLN":
+                statement.setDouble(1, 0);
+                statement.setDouble(2, 0);
+                statement.setDouble(3, amount);
+                break;
+            case "EURO":
+                statement.setDouble(1, amount);
+                statement.setDouble(2, 0);
+                statement.setDouble(3, 0);
+                break;
+            case "USD":
+                statement.setDouble(1, 0);
+                statement.setDouble(2, amount);
+                statement.setDouble(3, 0);
+                break;
+        }
+    }
 
 
     //      TAKE ALL CREDENTIALS METHOD - JUST TO IMPROVE VISIBILITY AND AVOID CODE DUPLICATION
-    private void takeAllCredentials(ResultSet rs, User user) throws SQLException {
-        user.setUserName(rs.getString("username"));
-        user.setEmail(rs.getString("email"));
-        user.setAccountNumber(rs.getLong("accountNumber"));
-        user.setBalanceEURO(rs.getDouble("balanceEURO"));
-        user.setBalanceUSD(rs.getDouble("balanceUSD"));
-        user.setBalancePLN(rs.getDouble("balancePLN"));
+    private void takeAllCredentials(ResultSet rs, long id) throws SQLException {
+        rs.getString("username");
+        rs.getString("email");
+        rs.getLong("accountNumber");
     }
 
     //      TRANSFER MONEY
-    public void transferMoney(long idFrom, long idTo, String currency, String exchangeType, double amount, double commission) {
+    public void transferMoney(long idFrom, long idTo, String currency, double amount, double commission) {
         cashOperations(SUBSTRACT_MONEY_FROM_ACCOUNT,idFrom,currency,amount);
         cashOperations(ADD_MONEY_TO_ACCOUNT,idTo,currency,(amount - (amount * commission)));
         saveInHistory(idFrom,idTo,(amount * commission),-amount,(amount - (amount * commission)),"Cash transfer",currency,currency);
+        addCommission(currency,amount*commission);
     }
 
     private User[] addToArray(User user, User[] users) {
